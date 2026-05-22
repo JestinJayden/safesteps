@@ -1,0 +1,214 @@
+// ─── screens/home_screen.dart ─────────────────────────────────────────────────
+
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../main.dart';
+import '../services/zone_service.dart';
+import '../models/zone.dart';
+import '../widgets/bottom_nav.dart';
+import '../widgets/zone_badge.dart';
+
+class HomeScreen extends StatefulWidget {
+  const HomeScreen({super.key});
+  @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  int _selectedRoute = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    context.read<ZoneService>().loadZones();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('SafeSteps', style: TextStyle(color: AppTheme.green, fontWeight: FontWeight.w600)),
+        backgroundColor: AppTheme.navy,
+        actions: [
+          IconButton(icon: const Icon(Icons.notifications_outlined, color: Colors.white), onPressed: () => Navigator.pushNamed(context, '/notifs')),
+          IconButton(icon: const Icon(Icons.person_outline, color: Colors.white), onPressed: () => Navigator.pushNamed(context, '/settings')),
+        ],
+      ),
+      body: Column(
+        children: [
+          _MapPlaceholder(),
+          Expanded(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.all(14),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text('AANBEVOLEN ROUTES', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: Colors.grey, letterSpacing: 0.5)),
+                  const SizedBox(height: 8),
+                  _RouteCard(
+                    title: 'Veiligste route',
+                    badge: ZoneLevel.comfortable,
+                    duration: '25 min',
+                    distance: '1.8 km',
+                    extra: 'Goed verlicht',
+                    extraIcon: Icons.lightbulb_outline,
+                    selected: _selectedRoute == 0,
+                    onTap: () => setState(() => _selectedRoute = 0),
+                  ),
+                  const SizedBox(height: 8),
+                  _RouteCard(
+                    title: 'Kortste route',
+                    badge: ZoneLevel.caution,
+                    duration: '17 min',
+                    distance: '1.2 km',
+                    extra: '1 drukke zone',
+                    extraIcon: Icons.warning_amber_outlined,
+                    selected: _selectedRoute == 1,
+                    onTap: () => setState(() => _selectedRoute = 1),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(14, 0, 14, 12),
+            child: ElevatedButton.icon(
+              icon: const Icon(Icons.play_arrow),
+              label: const Text('Selectie opstarten'),
+              onPressed: () => Navigator.pushNamed(context, '/walk'),
+            ),
+          ),
+        ],
+      ),
+      bottomNavigationBar: const AppBottomNav(currentIndex: 0),
+    );
+  }
+}
+
+class _MapPlaceholder extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: 200,
+      color: const Color(0xFFDDE8F0),
+      child: Stack(
+        children: [
+          // Straten
+          Positioned(child: Container(height: 10, color: const Color(0xFFC8D8E4)), top: 80, left: 0, right: 0),
+          Positioned(child: Container(height: 10, color: const Color(0xFFC8D8E4)), top: 130, left: 0, right: 0),
+          Positioned(child: Container(width: 10, color: const Color(0xFFC8D8E4)), left: 100, top: 0, bottom: 0),
+          Positioned(child: Container(width: 10, color: const Color(0xFFC8D8E4)), left: 200, top: 0, bottom: 0),
+          // Heatmap zones
+          Positioned(left: 40, top: 40, child: _HeatCircle(color: const Color(0xFF1D9E75), size: 90)),
+          Positioned(left: 160, top: 50, child: _HeatCircle(color: const Color(0xFFE24B4A), size: 70)),
+          Positioned(left: 230, top: 110, child: _HeatCircle(color: const Color(0xFFEF9F27), size: 55)),
+          Positioned(left: 120, top: 120, child: _HeatCircle(color: const Color(0xFF1D9E75), size: 50)),
+          // Jij
+          Positioned(
+            left: 110, top: 80,
+            child: Container(width: 14, height: 14, decoration: BoxDecoration(color: AppTheme.navy, shape: BoxShape.circle, border: Border.all(color: Colors.white, width: 2))),
+          ),
+          // Legenda
+          Positioned(
+            bottom: 8, right: 8,
+            child: Container(
+              padding: const EdgeInsets.all(7),
+              decoration: BoxDecoration(color: Colors.white.withOpacity(0.92), borderRadius: BorderRadius.circular(8)),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _LegendRow(color: const Color(0xFF1D9E75), label: 'Comfortabel'),
+                  _LegendRow(color: const Color(0xFFEF9F27), label: 'Let op'),
+                  _LegendRow(color: const Color(0xFFE24B4A), label: 'Drukker'),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _HeatCircle extends StatelessWidget {
+  final Color color;
+  final double size;
+  const _HeatCircle({required this.color, required this.size});
+  @override
+  Widget build(BuildContext context) => Container(
+    width: size, height: size,
+    decoration: BoxDecoration(shape: BoxShape.circle, color: color.withOpacity(0.45)),
+  );
+}
+
+class _LegendRow extends StatelessWidget {
+  final Color color;
+  final String label;
+  const _LegendRow({required this.color, required this.label});
+  @override
+  Widget build(BuildContext context) => Padding(
+    padding: const EdgeInsets.only(bottom: 2),
+    child: Row(children: [
+      Container(width: 9, height: 9, decoration: BoxDecoration(color: color, shape: BoxShape.circle)),
+      const SizedBox(width: 5),
+      Text(label, style: const TextStyle(fontSize: 10, color: Colors.black87)),
+    ]),
+  );
+}
+
+class _RouteCard extends StatelessWidget {
+  final String title;
+  final ZoneLevel badge;
+  final String duration;
+  final String distance;
+  final String extra;
+  final IconData extraIcon;
+  final bool selected;
+  final VoidCallback onTap;
+
+  const _RouteCard({
+    required this.title, required this.badge, required this.duration,
+    required this.distance, required this.extra, required this.extraIcon,
+    required this.selected, required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          border: Border.all(color: selected ? AppTheme.navy : Colors.grey.shade300, width: selected ? 2 : 0.5),
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(title, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w500)),
+                ZoneBadge(level: badge),
+              ],
+            ),
+            const SizedBox(height: 6),
+            Row(children: [
+              Icon(Icons.access_time, size: 13, color: Colors.grey.shade500),
+              const SizedBox(width: 4),
+              Text(duration, style: TextStyle(fontSize: 11, color: Colors.grey.shade500)),
+              const SizedBox(width: 12),
+              Icon(Icons.place_outlined, size: 13, color: Colors.grey.shade500),
+              const SizedBox(width: 4),
+              Text(distance, style: TextStyle(fontSize: 11, color: Colors.grey.shade500)),
+              const SizedBox(width: 12),
+              Icon(extraIcon, size: 13, color: Colors.grey.shade500),
+              const SizedBox(width: 4),
+              Text(extra, style: TextStyle(fontSize: 11, color: Colors.grey.shade500)),
+            ]),
+          ],
+        ),
+      ),
+    );
+  }
+}

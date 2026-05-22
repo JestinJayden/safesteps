@@ -1,0 +1,47 @@
+name: safesteps
+description: Veilig wandelen door Rotterdam - smart armband app
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.0.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  # Kaart
+  flutter_map: ^6.1.0
+  latlong2: ^0.9.0
+
+  # GPS locatie
+  geolocator: ^11.0.0
+
+  # Bluetooth (ESP32 armband)
+  flutter_blue_plus: ^1.31.0
+
+  # Lokale opslag
+  shared_preferences: ^2.2.2
+
+  # Database voor wandelhistorie
+  sqflite: ^2.3.2
+  path: ^1.9.0
+
+  # Permissies
+  permission_handler: ^11.3.0
+
+  # State management
+  provider: ^6.1.2
+
+  # Icons
+  cupertino_icons: ^1.0.6
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^3.0.0
+
+flutter:
+  uses-material-design: true
+  assets:
+    - lib/data/
