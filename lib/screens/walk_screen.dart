@@ -3,11 +3,12 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:latlong2/latlong.dart';
 import '../main.dart';
 import '../services/ble_service.dart';
 import '../services/zone_service.dart';
-import '../models/zone.dart';
 import '../widgets/zone_badge.dart';
+import '../widgets/rotterdam_map.dart';
 
 class WalkScreen extends StatefulWidget {
   const WalkScreen({super.key});
@@ -54,7 +55,7 @@ class _WalkScreenState extends State<WalkScreen> {
   @override
   Widget build(BuildContext context) {
     final ble = context.watch<BleService>();
-    final zone = context.watch<ZoneService>();
+    final zoneService = context.watch<ZoneService>();
 
     return Scaffold(
       appBar: AppBar(
@@ -81,25 +82,12 @@ class _WalkScreenState extends State<WalkScreen> {
             ),
           ),
 
-          // Map placeholder
-          Container(
-            height: 170,
-            color: const Color(0xFFDDE8F0),
-            child: Stack(
-              children: [
-                Positioned(child: Container(height: 10, color: const Color(0xFFC8D8E4)), top: 75, left: 0, right: 0),
-                Positioned(child: Container(width: 10, color: const Color(0xFFC8D8E4)), left: 110, top: 0, bottom: 0),
-                Container(color: const Color(0xFF1D9E75).withOpacity(0.3)),
-                Positioned(
-                  left: 100, top: 70,
-                  child: Container(width: 14, height: 14, decoration: BoxDecoration(color: AppTheme.navy, shape: BoxShape.circle, border: Border.all(color: Colors.white, width: 2))),
-                ),
-                Positioned(
-                  left: 100, top: 77,
-                  child: Container(width: 110, height: 2.5, color: AppTheme.navy.withOpacity(0.6)),
-                ),
-              ],
-            ),
+          // Echte kaart, ingezoomd op de gebruiker
+          RotterdamMap(
+            zones: zoneService.zones,
+            height: 200,
+            initialZoom: 15,
+            userLocation: const LatLng(51.9225, 4.4792),
           ),
 
           // Richting card
@@ -114,7 +102,7 @@ class _WalkScreenState extends State<WalkScreen> {
               children: [
                 Container(
                   width: 36, height: 36,
-                  decoration: BoxDecoration(color: AppTheme.navy, shape: BoxShape.circle),
+                  decoration: const BoxDecoration(color: AppTheme.navy, shape: BoxShape.circle),
                   child: const Icon(Icons.arrow_back, color: Colors.white, size: 18),
                 ),
                 const SizedBox(width: 10),
@@ -143,7 +131,7 @@ class _WalkScreenState extends State<WalkScreen> {
                 _StatBox(
                   value: '',
                   label: 'Zone',
-                  child: ZoneBadge(level: zone.currentLevel),
+                  child: ZoneBadge(level: zoneService.currentLevel),
                 ),
               ],
             ),

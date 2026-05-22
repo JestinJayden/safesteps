@@ -7,6 +7,7 @@ import '../services/zone_service.dart';
 import '../models/zone.dart';
 import '../widgets/bottom_nav.dart';
 import '../widgets/zone_badge.dart';
+import '../widgets/rotterdam_map.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -25,6 +26,8 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final zoneService = context.watch<ZoneService>();
+
     return Scaffold(
       appBar: AppBar(
         title: Text('SafeSteps', style: TextStyle(color: AppTheme.green, fontWeight: FontWeight.w600)),
@@ -36,7 +39,34 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
       body: Column(
         children: [
-          _MapPlaceholder(),
+          // Echte OpenStreetMap kaart met zones
+          Stack(
+            children: [
+              RotterdamMap(
+                zones: zoneService.zones,
+                height: 220,
+              ),
+              Positioned(
+                bottom: 8,
+                left: 8,
+                child: Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.92),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: const Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _LegendRow(color: AppTheme.green, label: 'Comfortabel'),
+                      _LegendRow(color: AppTheme.amber, label: 'Let op'),
+                      _LegendRow(color: AppTheme.red, label: 'Drukker'),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
           Expanded(
             child: SingleChildScrollView(
               padding: const EdgeInsets.all(14),
@@ -85,62 +115,6 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 }
 
-class _MapPlaceholder extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      height: 200,
-      color: const Color(0xFFDDE8F0),
-      child: Stack(
-        children: [
-          // Straten
-          Positioned(child: Container(height: 10, color: const Color(0xFFC8D8E4)), top: 80, left: 0, right: 0),
-          Positioned(child: Container(height: 10, color: const Color(0xFFC8D8E4)), top: 130, left: 0, right: 0),
-          Positioned(child: Container(width: 10, color: const Color(0xFFC8D8E4)), left: 100, top: 0, bottom: 0),
-          Positioned(child: Container(width: 10, color: const Color(0xFFC8D8E4)), left: 200, top: 0, bottom: 0),
-          // Heatmap zones
-          Positioned(left: 40, top: 40, child: _HeatCircle(color: const Color(0xFF1D9E75), size: 90)),
-          Positioned(left: 160, top: 50, child: _HeatCircle(color: const Color(0xFFE24B4A), size: 70)),
-          Positioned(left: 230, top: 110, child: _HeatCircle(color: const Color(0xFFEF9F27), size: 55)),
-          Positioned(left: 120, top: 120, child: _HeatCircle(color: const Color(0xFF1D9E75), size: 50)),
-          // Jij
-          Positioned(
-            left: 110, top: 80,
-            child: Container(width: 14, height: 14, decoration: BoxDecoration(color: AppTheme.navy, shape: BoxShape.circle, border: Border.all(color: Colors.white, width: 2))),
-          ),
-          // Legenda
-          Positioned(
-            bottom: 8, right: 8,
-            child: Container(
-              padding: const EdgeInsets.all(7),
-              decoration: BoxDecoration(color: Colors.white.withOpacity(0.92), borderRadius: BorderRadius.circular(8)),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  _LegendRow(color: const Color(0xFF1D9E75), label: 'Comfortabel'),
-                  _LegendRow(color: const Color(0xFFEF9F27), label: 'Let op'),
-                  _LegendRow(color: const Color(0xFFE24B4A), label: 'Drukker'),
-                ],
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _HeatCircle extends StatelessWidget {
-  final Color color;
-  final double size;
-  const _HeatCircle({required this.color, required this.size});
-  @override
-  Widget build(BuildContext context) => Container(
-    width: size, height: size,
-    decoration: BoxDecoration(shape: BoxShape.circle, color: color.withOpacity(0.45)),
-  );
-}
-
 class _LegendRow extends StatelessWidget {
   final Color color;
   final String label;
@@ -148,7 +122,7 @@ class _LegendRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Padding(
     padding: const EdgeInsets.only(bottom: 2),
-    child: Row(children: [
+    child: Row(mainAxisSize: MainAxisSize.min, children: [
       Container(width: 9, height: 9, decoration: BoxDecoration(color: color, shape: BoxShape.circle)),
       const SizedBox(width: 5),
       Text(label, style: const TextStyle(fontSize: 10, color: Colors.black87)),
