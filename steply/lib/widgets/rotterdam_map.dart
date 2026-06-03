@@ -1,6 +1,5 @@
 // ─── widgets/rotterdam_map.dart ───────────────────────────────────────────────
-// Echte kaart via OpenStreetMap (flutter_map). Tekent de zones uit de dataset
-// als gekleurde cirkels en toont optioneel de gebruikerslocatie.
+// Echte kaart via OpenStreetMap met zones, route en live locatie.
 
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
@@ -11,6 +10,7 @@ import '../main.dart';
 class RotterdamMap extends StatelessWidget {
   final List<Zone> zones;
   final LatLng? userLocation;
+  final List<LatLng> routePoints;
   final double height;
   final double initialZoom;
   final LatLng? center;
@@ -19,12 +19,12 @@ class RotterdamMap extends StatelessWidget {
     super.key,
     required this.zones,
     this.userLocation,
+    this.routePoints = const [],
     this.height = 200,
     this.initialZoom = 12.5,
     this.center,
   });
 
-  // Kleur per zone-niveau (met doorzichtigheid voor de vulling)
   Color _zoneColor(ZoneLevel level) => switch (level) {
         ZoneLevel.comfortable => AppTheme.green,
         ZoneLevel.caution => AppTheme.amber,
@@ -33,29 +33,25 @@ class RotterdamMap extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final mapCenter = center ??
-        userLocation ??
-        const LatLng(51.9225, 4.4792); // Rotterdam centrum
-
+    final mapCenter = center ?? userLocation ?? const LatLng(51.9225, 4.4792);
     return SizedBox(
       height: height,
       child: FlutterMap(
         options: MapOptions(
           initialCenter: mapCenter,
           initialZoom: initialZoom,
-          interactionOptions: const InteractionOptions(
-            flags: InteractiveFlag.all & ~InteractiveFlag.rotate,
-          ),
+          interactionOptions: const InteractionOptions(flags: InteractiveFlag.all & ~InteractiveFlag.rotate),
         ),
         children: [
-          // De echte kaart-tegels van OpenStreetMap
           TileLayer(
             urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-            userAgentPackageName: 'nl.hr.safesteps',
+            userAgentPackageName: 'nl.hr.steply',
             maxZoom: 19,
           ),
-
-          // Zones als gekleurde cirkels
+          if (routePoints.isNotEmpty)
+            PolylineLayer(
+              polylines: [Polyline(points: routePoints, color: AppTheme.navy, strokeWidth: 4)],
+            ),
           CircleLayer(
             circles: zones.map((zone) {
               final color = _zoneColor(zone.level);
@@ -63,44 +59,34 @@ class RotterdamMap extends StatelessWidget {
                 point: LatLng(zone.lat, zone.lng),
                 radius: zone.radiusMeters,
                 useRadiusInMeter: true,
-                color: color.withOpacity(0.30),
-                borderColor: color.withOpacity(0.70),
+                color: color.withOpacity(0.28),
+                borderColor: color.withOpacity(0.65),
                 borderStrokeWidth: 1.5,
               );
             }).toList(),
           ),
-
-          // Gebruikerslocatie als blauwe stip
           if (userLocation != null)
             MarkerLayer(
               markers: [
                 Marker(
                   point: userLocation!,
-                  width: 18,
-                  height: 18,
+                  width: 28, height: 28,
                   child: Container(
-                    decoration: BoxDecoration(
-                      color: AppTheme.navy,
-                      shape: BoxShape.circle,
-                      border: Border.all(color: Colors.white, width: 2.5),
-                      boxShadow: [
-                        BoxShadow(
-                          color: AppTheme.navy.withOpacity(0.4),
-                          blurRadius: 6,
-                          spreadRadius: 1,
-                        ),
-                      ],
+                    decoration: BoxDecoration(color: AppTheme.navy.withOpacity(0.2), shape: BoxShape.circle),
+                    child: Container(
+                      margin: const EdgeInsets.all(6),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF2E6FE0),
+                        shape: BoxShape.circle,
+                        border: Border.all(color: Colors.white, width: 2.5),
+                      ),
                     ),
                   ),
                 ),
               ],
             ),
-
-          // OpenStreetMap attributie (verplicht bij gebruik)
           const RichAttributionWidget(
-            attributions: [
-              TextSourceAttribution('OpenStreetMap contributors'),
-            ],
+            attributions: [TextSourceAttribution('OpenStreetMap')],
           ),
         ],
       ),

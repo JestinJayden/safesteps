@@ -8,9 +8,12 @@ import 'screens/notifications_screen.dart';
 import 'screens/chat_screen.dart';
 import 'screens/settings_screen.dart';
 import 'screens/walk_done_screen.dart';
+import 'screens/concerns_screen.dart';
+import 'screens/plan_route_screen.dart';
 import 'services/location_service.dart';
 import 'services/ble_service.dart';
 import 'services/zone_service.dart';
+import 'services/route_service.dart';
 import 'services/storage_service.dart';
 
 void main() async {
@@ -28,6 +31,7 @@ class SafeStepsApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => LocationService()),
         ChangeNotifierProvider(create: (_) => BleService()),
         ChangeNotifierProvider(create: (_) => ZoneService()),
+        ChangeNotifierProvider(create: (_) => RouteService()),
         ChangeNotifierProvider(create: (_) => StorageService()),
       ],
       child: MaterialApp(
@@ -38,6 +42,8 @@ class SafeStepsApp extends StatelessWidget {
         routes: {
           '/':           (_) => const OnboardScreen(),
           '/home':       (_) => const HomeScreen(),
+          '/concerns':   (_) => const ConcernsScreen(),
+          '/plan':       (_) => const PlanRouteScreen(),
           '/walk':       (_) => const WalkScreen(),
           '/walk-done':  (_) => const WalkDoneScreen(),
           '/notifs':     (_) => const NotificationsScreen(),

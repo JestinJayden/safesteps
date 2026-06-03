@@ -1,5 +1,5 @@
-name: safesteps
-description: Veilig wandelen door Rotterdam - smart armband app
+name: steply
+description: Steply - veilig wandelen voor ouderen in Rotterdam
 publish_to: 'none'
 version: 1.0.0+1
 
@@ -17,16 +17,11 @@ dependencies:
   # GPS locatie
   geolocator: ^11.0.0
 
-  # HTTP requests (routing + geocoding)
-  http: ^1.2.0
-
   # Bluetooth (ESP32 armband)
   flutter_blue_plus: ^1.31.0
 
   # Lokale opslag
   shared_preferences: ^2.2.2
-
-  # Database voor wandelhistorie
   sqflite: ^2.3.2
   path: ^1.9.0
 
@@ -35,6 +30,9 @@ dependencies:
 
   # State management
   provider: ^6.1.2
+
+  # HTTP requests (routes)
+  http: ^1.1.0
 
   # Icons
   cupertino_icons: ^1.0.6

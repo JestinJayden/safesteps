@@ -9,28 +9,26 @@ import '../models/walk_session.dart';
 class StorageService extends ChangeNotifier {
   Database? _db;
 
-  // ── Database initialisatie ────────────────────────────────────────────────
   Future<void> init() async {
     final dbPath = await getDatabasesPath();
     _db = await openDatabase(
-      p.join(dbPath, 'safesteps.db'),
+      p.join(dbPath, 'steply.db'),
       version: 1,
       onCreate: (db, version) async {
         await db.execute('''
           CREATE TABLE walk_sessions (
-            id              INTEGER PRIMARY KEY AUTOINCREMENT,
-            start_time      TEXT NOT NULL,
-            end_time        TEXT,
-            distance_km     REAL NOT NULL,
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            start_time TEXT NOT NULL,
+            end_time TEXT,
+            distance_km REAL NOT NULL,
             duration_seconds INTEGER NOT NULL,
-            zone_warnings   INTEGER NOT NULL
+            zone_warnings INTEGER NOT NULL
           )
         ''');
       },
     );
   }
 
-  // ── Wandelsessies ─────────────────────────────────────────────────────────
   Future<int> saveWalk(WalkSession session) async {
     await _ensureDb();
     final id = await _db!.insert('walk_sessions', session.toMap());
@@ -40,27 +38,10 @@ class StorageService extends ChangeNotifier {
 
   Future<List<WalkSession>> getRecentWalks({int limit = 20}) async {
     await _ensureDb();
-    final maps = await _db!.query(
-      'walk_sessions',
-      orderBy: 'start_time DESC',
-      limit: limit,
-    );
+    final maps = await _db!.query('walk_sessions', orderBy: 'start_time DESC', limit: limit);
     return maps.map(WalkSession.fromMap).toList();
   }
 
-  Future<Map<String, dynamic>> getStats() async {
-    await _ensureDb();
-    final result = await _db!.rawQuery('''
-      SELECT
-        COUNT(*)           AS total_walks,
-        SUM(distance_km)   AS total_km,
-        SUM(duration_seconds) AS total_seconds
-      FROM walk_sessions
-    ''');
-    return result.first;
-  }
-
-  // ── Gebruikersvoorkeuren (via SharedPreferences) ──────────────────────────
   Future<void> setBool(String key, bool value) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool(key, value);

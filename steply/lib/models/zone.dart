@@ -1,6 +1,4 @@
 // ─── models/zone.dart ─────────────────────────────────────────────────────────
-// Een zone is een gebied in Rotterdam met een comfortscore.
-// score 1-10: 1 = zeer druk/onveilig, 10 = rustig/comfortabel
 
 class Zone {
   final String id;
@@ -23,7 +21,6 @@ class Zone {
     required this.busy,
   });
 
-  // Geeft de kleur voor op de kaart terug
   ZoneLevel get level {
     if (comfortScore >= 7) return ZoneLevel.comfortable;
     if (comfortScore >= 4) return ZoneLevel.caution;

@@ -12,7 +12,7 @@ class LocationService extends ChangeNotifier {
   bool get isTracking => _isTracking;
   String get error => _error;
 
-  double get lat => _currentPosition?.latitude ?? 51.9225;   // fallback: Rotterdam
+  double get lat => _currentPosition?.latitude ?? 51.9225;
   double get lng => _currentPosition?.longitude ?? 4.4792;
 
   Future<bool> requestPermission() async {
@@ -22,7 +22,6 @@ class LocationService extends ChangeNotifier {
       notifyListeners();
       return false;
     }
-
     LocationPermission permission = await Geolocator.checkPermission();
     if (permission == LocationPermission.denied) {
       permission = await Geolocator.requestPermission();
@@ -33,7 +32,7 @@ class LocationService extends ChangeNotifier {
       }
     }
     if (permission == LocationPermission.deniedForever) {
-      _error = 'Locatietoegang permanent geweigerd — open instellingen';
+      _error = 'Locatietoegang permanent geweigerd';
       notifyListeners();
       return false;
     }
@@ -43,15 +42,10 @@ class LocationService extends ChangeNotifier {
   Future<void> startTracking(Function(double lat, double lng) onUpdate) async {
     final granted = await requestPermission();
     if (!granted) return;
-
     _isTracking = true;
     notifyListeners();
-
     Geolocator.getPositionStream(
-      locationSettings: const LocationSettings(
-        accuracy: LocationAccuracy.high,
-        distanceFilter: 5, // update elke 5 meter
-      ),
+      locationSettings: const LocationSettings(accuracy: LocationAccuracy.high, distanceFilter: 5),
     ).listen((Position position) {
       _currentPosition = position;
       notifyListeners();
@@ -64,7 +58,6 @@ class LocationService extends ChangeNotifier {
     notifyListeners();
   }
 
-  // Berekent afstand in meter tussen twee posities
   double distanceBetween(double lat1, double lng1, double lat2, double lng2) {
     return Geolocator.distanceBetween(lat1, lng1, lat2, lng2);
   }

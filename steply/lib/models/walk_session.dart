@@ -6,7 +6,7 @@ class WalkSession {
   final DateTime? endTime;
   final double distanceKm;
   final int durationSeconds;
-  final int zoneWarnings; // aantal keer dat armband trilde
+  final int zoneWarnings;
 
   const WalkSession({
     this.id,
@@ -37,9 +37,7 @@ class WalkSession {
   factory WalkSession.fromMap(Map<String, dynamic> map) => WalkSession(
         id: map['id'] as int?,
         startTime: DateTime.parse(map['start_time'] as String),
-        endTime: map['end_time'] != null
-            ? DateTime.parse(map['end_time'] as String)
-            : null,
+        endTime: map['end_time'] != null ? DateTime.parse(map['end_time'] as String) : null,
         distanceKm: (map['distance_km'] as num).toDouble(),
         durationSeconds: map['duration_seconds'] as int,
         zoneWarnings: map['zone_warnings'] as int,
