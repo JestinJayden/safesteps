@@ -14,12 +14,6 @@ import 'screens/help_screen.dart';
 import 'screens/situation_screen.dart';
 import 'screens/help_coming_screen.dart';
 import 'screens/profile_screen.dart';
-import 'screens/helper_home_screen.dart';
-import 'screens/helper_notifications_screen.dart';
-import 'screens/helper_none_screen.dart';
-import 'screens/helper_enroute_screen.dart';
-import 'screens/helper_done_screen.dart';
-import 'screens/helper_profile_screen.dart';
 
 import 'services/location_service.dart';
 import 'services/ble_service.dart';
@@ -64,12 +58,6 @@ class SteplyApp extends StatelessWidget {
           '/situation':     (_) => const SituationScreen(),
           '/help-coming':   (_) => const HelpComingScreen(),
           '/profile':       (_) => const ProfileScreen(),
-          '/helper-home':          (_) => const HelperHomeScreen(),
-          '/helper-notifications': (_) => const HelperNotificationsScreen(),
-          '/helper-none':          (_) => const HelperNoneScreen(),
-          '/helper-enroute':       (_) => const HelperEnrouteScreen(),
-          '/helper-done':          (_) => const HelperDoneScreen(),
-          '/helper-profile':       (_) => const HelperProfileScreen(),
         },
       ),
     );
